@@ -41,5 +41,8 @@ export class AwsMicroservicesStack extends cdk.Stack {
       entry: join(__dirname, `/../src/index.js`),
       ...nodeJsFunctionProps,
     });
+
+    // give permission to the function to interact with product table for CRUD operations
+    productTable.grantReadWriteData(productFunction);
   }
 }
