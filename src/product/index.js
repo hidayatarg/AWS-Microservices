@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 // lambda function
 exports.handler = async function (event) {
     console.log('request:', JSON.stringify(event, undefined, 2));
-
+    let body;
     try {
         // TODO: Switch case on event.httpmethod to perform CRUD operations
         switch (event.httpMethod) {
