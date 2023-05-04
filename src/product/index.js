@@ -1,4 +1,4 @@
-import { DeleteItemCommand, GetItemCommand, PutItemCommand, ScanCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { DeleteItemCommand, GetItemCommand, PutItemCommand, QueryCommand, ScanCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,7 +10,10 @@ exports.handler = async function (event) {
     // TODO: Switch case on event.httpmethod to perform CRUD operations
     switch (event.httpmethod) {
         case 'GET':
-            if (event.pathParameters != null) {
+            if (event.queryStringParameters != null) {
+                body = await getProductsByCategory(event); // GET product/1234?category=phone
+            }
+            else if (event.pathParameters != null) {
                 body = await getProduct(event.pathParameters.id); // GET product/1
             } else {
                 body = await getAllProducts(); // GET all products
@@ -70,6 +73,32 @@ const getAllProducts = async () => {
         console.log(Items);
         return (Items) ? Items.map((item) => unmarshall(item)) : {};
 
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const getProductsByCategory = async (event) => {
+    console.log("getProductsByCategory");
+    try {
+        const productId = event.pathParameters.id;
+        const category = event.queryStringParameters.category;
+
+        const params = {
+            KeyConditionExpression: "id = :productId",
+            FilterExpression: "contains (category, :category)",
+            ExpressionAttributeValues: {
+                ":productId": { S: productId },
+                ":category": { S: category }
+            },
+            TableName: process.env.DYNAMODB_TABLE_NAME
+        };
+
+        const { Items } = await ddbClient.send(new QueryCommand(params));
+
+        console.log(Items);
+        return Items.map((item) => unmarshall(item));
     } catch (e) {
         console.error(e);
         throw e;
