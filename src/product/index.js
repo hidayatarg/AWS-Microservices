@@ -1,4 +1,4 @@
-import { GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { GetItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
 
@@ -26,6 +26,7 @@ const getProduct = async (productId) => {
 
     try {
         const params = {
+            // the environment variable are injected while creating nodeJsFunction
             TableName: process.env.DYNAMODB_TABLE_NAME,
             // partication Id key
             Key: marshall({ id: productId }),
@@ -35,6 +36,25 @@ const getProduct = async (productId) => {
 
         console.log(Item);
         return Item ? unmarshall(Item) : {};
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const getAllProducts = async () => {
+    console.log('getAllProducts');
+
+    try {
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME
+        };
+
+        const { Items } = await ddbClient.send(new ScanCommand(params));
+
+        console.log(Items);
+        return (Items) ? Items.map((item) => unmarshall(item)) : {};
+
     } catch (e) {
         console.error(e);
         throw e;
