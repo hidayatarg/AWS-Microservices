@@ -9,7 +9,7 @@ exports.handler = async function (event) {
 
     try {
         // TODO: Switch case on event.httpmethod to perform CRUD operations
-        switch (event.httpmethod) {
+        switch (event.httpMethod) {
             case 'GET':
                 if (event.queryStringParameters != null) {
                     body = await getProductsByCategory(event); // GET product/1234?category=phone
