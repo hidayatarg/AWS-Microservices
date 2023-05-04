@@ -7,36 +7,51 @@ import { v4 as uuidv4 } from 'uuid';
 exports.handler = async function (event) {
     console.log('request:', JSON.stringify(event, undefined, 2));
 
-    // TODO: Switch case on event.httpmethod to perform CRUD operations
-    switch (event.httpmethod) {
-        case 'GET':
-            if (event.queryStringParameters != null) {
-                body = await getProductsByCategory(event); // GET product/1234?category=phone
-            }
-            else if (event.pathParameters != null) {
-                body = await getProduct(event.pathParameters.id); // GET product/1
-            } else {
-                body = await getAllProducts(); // GET all products
-            }
-            break;
-        case 'POST':
-            body = await createProduct(event); // POST product
-            break;
-        case "DELETE":
-            body = await deleteProduct(event.pathParameters.id); // DELETE product
-            break;
-        case "PUT":
-            body = await updateProduct(event);
-            break;
-        default:
-            throw new Error(`Unsupported route: "${event.httpmethod}"`);
-    }
+    try {
+        // TODO: Switch case on event.httpmethod to perform CRUD operations
+        switch (event.httpmethod) {
+            case 'GET':
+                if (event.queryStringParameters != null) {
+                    body = await getProductsByCategory(event); // GET product/1234?category=phone
+                }
+                else if (event.pathParameters != null) {
+                    body = await getProduct(event.pathParameters.id); // GET product/1
+                } else {
+                    body = await getAllProducts(); // GET all products
+                }
+                break;
+            case 'POST':
+                body = await createProduct(event); // POST product
+                break;
+            case "DELETE":
+                body = await deleteProduct(event.pathParameters.id); // DELETE product
+                break;
+            case "PUT":
+                body = await updateProduct(event);
+                break;
+            default:
+                throw new Error(`Unsupported route: "${event.httpmethod}"`);
+        }
+        console.log("body: ", body);
 
-    return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'text/plain' },
-        body: `Hello from Product ! You've hit ${event.path}\n`,
-    };
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: `Successfully finished operation: "${event.httpMethod}"`,
+                body: body
+            })
+        };
+    } catch (e) {
+        console.error(e);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: "Failed to perform operation.",
+                errorMsg: e.message,
+                errorStack: e.stack,
+            })
+        };
+    }
 };
 
 const getProduct = async (productId) => {
