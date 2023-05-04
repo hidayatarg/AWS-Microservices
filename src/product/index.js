@@ -1,6 +1,7 @@
-import { GetItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
+import { GetItemCommand, PutItemCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
+import { v4 as uuidv4 } from 'uuid';
 
 // lambda function
 exports.handler = async function (event) {
@@ -9,9 +10,17 @@ exports.handler = async function (event) {
     // TODO: Switch case on event.httpmethod to perform CRUD operations
     switch (event.httpmethod) {
         case 'GET':
-            if (event.pathParameters != null)
+            if (event.pathParameters != null) {
                 body = await getProduct(event.pathParameters.id); // GET product/1
-            else body = await getAllProducts(); // GET all products
+            } else {
+                body = await getAllProducts(); // GET all products
+            }
+            break;
+        case 'POST':
+            body = await createProduct(event); // POSY product
+            break;
+        default:
+            throw new Error(`Unsupported route: "${event.httpmethod}"`);
     }
 
     return {
@@ -54,6 +63,32 @@ const getAllProducts = async () => {
 
         console.log(Items);
         return (Items) ? Items.map((item) => unmarshall(item)) : {};
+
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const createProduct = async (event) => {
+    try {
+        // for cloudwatch
+        console.log(`createProduct function. event : "${event}"`);
+
+        const productRequest = JSON.parse(event.body);
+
+        // set productid
+        const productId = uuidv4();
+        productRequest.id = productId;
+
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME,
+            Item: marshall(productRequest || {})
+        };
+
+        const createResult = await ddbClient.send(new PutItemCommand(params));
+        console.log(createResult);
+        return createResult;
 
     } catch (e) {
         console.error(e);
