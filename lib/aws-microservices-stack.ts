@@ -1,3 +1,4 @@
+import { SwnDatabase } from './database';
 import * as cdk from 'aws-cdk-lib';
 import { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -14,16 +15,7 @@ export class AwsMicroservicesStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const productTable = new Table(this, 'product', {
-      partitionKey: {
-        name: 'id',
-        type: AttributeType.STRING,
-      },
-      tableName: 'product',
-      // it will destroy table when destory cdk is executed
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
-    });
+    const database = new SwnDatabase(this, 'Database');
 
     // lambda nodejs function -> using bundling and packaging features of it (more specifica)
     // including aws-sdk when creating the nodejs functions
@@ -33,7 +25,7 @@ export class AwsMicroservicesStack extends cdk.Stack {
       },
       environment: {
         PRIMARY_KEY: 'id',
-        DYNAMODB_TABLE_NAME: productTable.tableName,
+        DYNAMODB_TABLE_NAME: database.productTable.tableName,
       },
       runtime: Runtime.NODEJS_14_X,
     };
@@ -44,7 +36,7 @@ export class AwsMicroservicesStack extends cdk.Stack {
     });
 
     // give permission to the function to interact with product table for CRUD operations
-    productTable.grantReadWriteData(productFunction);
+    database.productTable.grantReadWriteData(productFunction);
 
     // Product microservice API Gateway
     // root name = product
