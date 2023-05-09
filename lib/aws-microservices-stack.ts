@@ -18,6 +18,7 @@ export class AwsMicroservicesStack extends cdk.Stack {
 
     const apigateway = new SwnApiGateway(this, 'Apigateway', {
       productMicroservice: microservice.productMicroservice,
+      basketMicroservice: microservice.basketMicroservice,
     });
   }
 }
