@@ -17,9 +17,16 @@ export class SwnDatabase extends Construct {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    // product dynamodb creation
-    // product: PK: id --name -description -imageFile -price -category
-    // these are fields we can pass through post request (client)
+    // product table expose
+    this.productTable = this.createProductTable();
+    // basket table expose
+    this.basketTable = this.createBasketTable();
+  }
+
+  // product dynamodb creation
+  // product: PK: id --name -description -imageFile -price -category
+  // these are fields we can pass through post request (client)
+  private createProductTable(): ITable {
     const productTable = new Table(this, 'product', {
       partitionKey: {
         name: 'id',
@@ -31,13 +38,15 @@ export class SwnDatabase extends Construct {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
-    // product expose
-    this.productTable = productTable;
+    return productTable;
+  }
 
-    // basket dynamodb creation
-    // basket: PK: username -basketItemList (SET-MAP object) (Nosql cannbe in same table in json)
-    // item1 -> {quantity - color - price - productId - productName}
-    // item2 -> {quantity - color - price - productId - productName}
+  // basket dynamodb creation
+  // basket: PK: username -basketItemList (SET-MAP object) (Nosql cannbe in same table in json)
+  // item1 -> {quantity - color - price - productId - productName}
+  // item2 -> {quantity - color - price - productId - productName}
+
+  private createBasketTable(): ITable {
     const basketTable = new Table(this, 'basket', {
       partitionKey: {
         name: 'userName',
@@ -49,7 +58,6 @@ export class SwnDatabase extends Construct {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
-    // basket expose
-    this.basketTable = basketTable;
+    return basketTable;
   }
 }
