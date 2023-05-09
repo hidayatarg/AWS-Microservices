@@ -3,7 +3,7 @@ import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 interface SwnApiGatewayProps {
-  productMicroservices: IFunction;
+  productMicroservice: IFunction;
 }
 
 export class SwnApiGateway extends Construct {
@@ -14,7 +14,7 @@ export class SwnApiGateway extends Construct {
     // root name = product
     const apigw = new LambdaRestApi(this, 'productApi', {
       restApiName: 'Product Service',
-      handler: props.productMicroservices,
+      handler: props.productMicroservice,
       // create routes => not directing all a proxy
       proxy: false,
     });

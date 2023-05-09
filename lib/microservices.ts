@@ -9,24 +9,33 @@ import { join } from 'path';
 
 interface SwnMicroservicesProps {
   productTable: ITable;
+  basketTable: ITable;
 }
 
 export class SwnMicroservices extends Construct {
   // expose lambda function
-  public readonly productMicroservices: NodejsFunction;
+  public readonly productMicroservice: NodejsFunction;
+  public readonly basketMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: SwnMicroservicesProps) {
     super(scope, id);
 
-    // lambda nodejs function -> using bundling and packaging features of it (more specifica)
-    // including aws-sdk when creating the nodejs functions
+    // product microservices
+    this.productMicroservice = this.createProductFunction(props.productTable);
+    // basket microservices
+    this.basketMicroservice = this.createBasketFunction(props.basketTable);
+  }
+
+  // lambda nodejs function -> using bundling and packaging features of it (more specifica)
+  // including aws-sdk when creating the nodejs functions
+  private createProductFunction(productTable: ITable): NodejsFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
       },
       environment: {
         PRIMARY_KEY: 'id',
-        DYNAMODB_TABLE_NAME: props.productTable.tableName,
+        DYNAMODB_TABLE_NAME: productTable.tableName,
       },
       runtime: Runtime.NODEJS_14_X,
     };
@@ -37,7 +46,29 @@ export class SwnMicroservices extends Construct {
     });
 
     // give permission to the function to interact with product table for CRUD operations
-    props.productTable.grantReadWriteData(productFunction);
-    this.productMicroservices = productFunction;
+    productTable.grantReadWriteData(productFunction);
+    return productFunction;
+  }
+
+  private createBasketFunction(basketTable: ITable): NodejsFunction {
+    const basketFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        PRIMARY_KEY: 'userName',
+        DYNAMODB_TABLE_NAME: basketTable.tableName,
+      },
+      runtime: Runtime.NODEJS_14_X,
+    };
+
+    const basketFunction = new NodejsFunction(this, 'basketLambdaFunction', {
+      entry: join(__dirname, `/../src/basket/index.js`),
+      ...basketFunctionProps,
+    });
+
+    // give permission to the function to interact with product table for CRUD operations
+    basketTable.grantReadWriteData(basketFunction);
+    return basketFunction;
   }
 }
