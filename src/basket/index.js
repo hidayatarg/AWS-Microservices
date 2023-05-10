@@ -63,7 +63,22 @@ exports.handler = async function (event) {
 
 const getBasket = async (userName) => {
     console.log('getBasket');
-    // function getBasket
+    try {
+        const params = {
+            // the environment variable are injected while creating nodeJsFunction
+            TableName: process.env.DYNAMODB_TABLE_NAME,
+            // partication userName key
+            Key: marshall({ userName: userName }),
+        };
+
+        const { Item } = await ddbClient.send(new GetItemCommand(params));
+
+        console.log(Item);
+        return Item ? unmarshall(Item) : {};
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
 
 const getAllBaskets = async () => {
