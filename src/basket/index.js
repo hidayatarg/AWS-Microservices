@@ -1,7 +1,6 @@
 import { DeleteItemCommand, GetItemCommand, PutItemCommand, QueryCommand, ScanCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
-import { v4 as uuidv4 } from 'uuid';
 
 // lambda function
 exports.handler = async function (event) {
@@ -101,7 +100,24 @@ const getAllBaskets = async () => {
 
 const createBasket = async (event) => {
     console.log('createBasket');
-    // function createBasket
+    try {
+        // for cloudwatch
+        console.log(`createBasket function. event : "${event}"`);
+
+        const requestBody = JSON.parse(event.body);
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME,
+            Item: marshall(requestBody || {})
+        };
+
+        const createResult = await ddbClient.send(new PutItemCommand(params));
+        console.log(createResult);
+        return createResult;
+
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
 
 const deleteBasket = async (userName) => {
