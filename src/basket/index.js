@@ -83,7 +83,20 @@ const getBasket = async (userName) => {
 
 const getAllBaskets = async () => {
     console.log('getAllBaskets');
-    // function getAllBaskets
+    try {
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME
+        };
+
+        const { Items } = await ddbClient.send(new ScanCommand(params));
+
+        console.log(Items);
+        return (Items) ? Items.map((item) => unmarshall(item)) : {};
+
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
 
 const createBasket = async (event) => {
