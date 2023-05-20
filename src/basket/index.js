@@ -141,4 +141,8 @@ const deleteBasket = async (userName) => {
 const checkoutBasket = async (event) => {
     console.log('checkoutBasket');
     // function checkoutBasket
+    // asynchronous communication -> event bridge
+    // publish event -> event bridge, 
+    // it will subscribe by order microservice and start ordering process
+
 };
