@@ -22,24 +22,5 @@ export class AwsMicroservicesStack extends cdk.Stack {
       productMicroservice: microservice.productMicroservice,
       basketMicroservice: microservice.basketMicroservice,
     });
-
-    //eventbus
-    const bus = new EventBus(this, 'SwnEventBus', {
-      eventBusName: 'SwnEventBus',
-    });
-
-    const checkoutBasketRule = new Rule(this, 'CheckoutBasketRule', {
-      eventBus: bus,
-      enabled: true,
-      description: 'When basket microservice checkout the basket',
-      eventPattern: {
-        source: ['com.swn.basket.checkoutbasket'],
-        detailType: ['CheckoutBasket'],
-      },
-      ruleName: 'CheckoutBasketRule',
-    });
-
-    checkoutBasketRule.addTarget(new LambdaFunction(orderingMicroservice));
-    // pass target to Ordering Lambda Service
   }
 }
