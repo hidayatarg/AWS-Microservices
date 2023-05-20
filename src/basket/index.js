@@ -121,8 +121,21 @@ const createBasket = async (event) => {
 };
 
 const deleteBasket = async (userName) => {
-    console.log('deleteBasket');
-    // function deleteBasket
+    console.log(`delete Basket, username: "${userName}"`);
+
+    try {
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME,
+            Key: marshall({ userName: userName }),
+        };
+
+        const deleteResult = await ddbClient.send(new DeleteItemCommand(params));
+        console.log(deleteResult);
+        return deleteResult;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
 
 const checkoutBasket = async (event) => {
