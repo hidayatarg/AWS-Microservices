@@ -5,6 +5,7 @@ import { Construct } from 'constructs';
 interface SwnApiGatewayProps {
   productMicroservice: IFunction;
   basketMicroservice: IFunction;
+  orderingMicroservice: IFunction;
 }
 
 export class SwnApiGateway extends Construct {
@@ -15,6 +16,8 @@ export class SwnApiGateway extends Construct {
     this.createProductApi(props.productMicroservice);
     // Basket api gateway
     this.createBasketApi(props.basketMicroservice);
+    // Order api gateway
+    this.createOrderApi(props.orderingMicroservice);
   }
 
   createProductApi(productMicroservice: IFunction) {
@@ -80,12 +83,27 @@ export class SwnApiGateway extends Construct {
     // expected request payload : { userName : swn }
   }
 
-  createOrderApi(basketMicroservice: IFunction) {
+  createOrderApi(orderingMicroservice: IFunction) {
     // Ordering microservices api gateway
     // root name = order
     // GET /order
     // GET /order/{userName}
     // expectedrequest: xxx/order/swn?orderDate=timestamp
     // ording ms graph input and query parameters and filter to DynamoDB
+
+    const apigw = new LambdaRestApi(this, 'orderApi', {
+      restApiName: 'Order Service',
+      handler: orderingMicroservice,
+      proxy: false,
+    });
+
+    const order = apigw.root.addResource('order');
+    order.addMethod('GET'); // GET /order
+
+    const singleOrder = order.addResource('{userName}');
+    singleOrder.addMethod('GET'); // GET /order/{userName}
+    // expectedrequest: xxx/order/swn?orderDate=timestamp
+    // ording ms graph input and query parameters and filter to DynamoDB
+    return singleOrder;
   }
 }

@@ -17,7 +17,7 @@ export class SwnMicroservices extends Construct {
   // expose lambda function
   public readonly productMicroservice: NodejsFunction;
   public readonly basketMicroservice: NodejsFunction;
-  public readonly orderingbasketMicroservice: NodejsFunction;
+  public readonly orderingMicroservice: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: SwnMicroservicesProps) {
     super(scope, id);
@@ -27,9 +27,7 @@ export class SwnMicroservices extends Construct {
     // basket microservices
     this.basketMicroservice = this.createBasketFunction(props.basketTable);
     // order microservices
-    this.orderingbasketMicroservice = this.createOrderingFunction(
-      props.orderTable
-    );
+    this.orderingMicroservice = this.createOrderingFunction(props.orderTable);
   }
 
   // lambda nodejs function -> using bundling and packaging features of it (more specifica)
