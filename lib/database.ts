@@ -12,6 +12,7 @@ export class SwnDatabase extends Construct {
   // expose table
   public readonly productTable: ITable;
   public readonly basketTable: ITable;
+  public readonly orderTable: ITable;
 
   //constructor requires two parameters
   constructor(scope: Construct, id: string) {
@@ -21,6 +22,8 @@ export class SwnDatabase extends Construct {
     this.productTable = this.createProductTable();
     // basket table expose
     this.basketTable = this.createBasketTable();
+    // order table expose
+    this.orderTable = this.createOrderTable();
   }
 
   // product dynamodb creation
@@ -63,4 +66,22 @@ export class SwnDatabase extends Construct {
 
   // order dynamodb creation
   // order: PK: username - SK(sortkey): orderDate --totalPrice -firstName -lastname -email -address -paymentMethod -cardInfo (SET-MAP object) (Nosql cannbe in same table in json)
+  private createOrderTable(): ITable {
+    const orderTable = new Table(this, 'order', {
+      partitionKey: {
+        name: 'userName',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'orderDate',
+        type: AttributeType.STRING,
+      },
+      tableName: 'order',
+      // it will destroy table when destory cdk is executed
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+
+    return orderTable;
+  }
 }
