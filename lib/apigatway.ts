@@ -79,4 +79,13 @@ export class SwnApiGateway extends Construct {
     basketCheckout.addMethod('POST'); // POST /basket/checkout
     // expected request payload : { userName : swn }
   }
+
+  createOrderApi(basketMicroservice: IFunction) {
+    // Ordering microservices api gateway
+    // root name = order
+    // GET /order
+    // GET /order/{userName}
+    // expectedrequest: xxx/order/swn?orderDate=timestamp
+    // ording ms graph input and query parameters and filter to DynamoDB
+  }
 }

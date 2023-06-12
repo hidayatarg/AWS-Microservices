@@ -60,4 +60,7 @@ export class SwnDatabase extends Construct {
 
     return basketTable;
   }
+
+  // order dynamodb creation
+  // order: PK: username - SK(sortkey): orderDate --totalPrice -firstName -lastname -email -address -paymentMethod -cardInfo (SET-MAP object) (Nosql cannbe in same table in json)
 }
