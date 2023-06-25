@@ -145,4 +145,15 @@ const checkoutBasket = async (event) => {
     // publish event -> event bridge, 
     // it will subscribe by order microservice and start ordering process
 
+    //1- getting existing basket with items
+
+    //2- create an event json object with basket item, 
+    // calculate total price, prepare order create json object to send ordering microservices
+
+
+    //3- publish event to event bridge - this will be subscribe by order microservice
+
+
+    //4- removing the exiting basket
+
 };
