@@ -1,6 +1,8 @@
 import { DeleteItemCommand, GetItemCommand, PutItemCommand, QueryCommand, ScanCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { ddbClient } from './ddbClient';
+import { ebClient } from './eventBridgeClient';
+import { PutEventsCommand } from '@aws-sdk/client-eventbridge';
 
 // lambda function
 exports.handler = async function (event) {
@@ -186,6 +188,33 @@ const prepareOrderPayload = (checkoutRequest, basket) => {
 
     } catch (e) {
         console.error(e);
+        throw e;
+    }
+}
+
+const publishCheckoutBasketEvent = async (checkoutPayload) => {
+    // putEventsCommand to put event to event bridge
+    console.log('publishCheckoutBasketEvent with payload :', checkoutPayload);
+
+    try {
+        const params = {
+            Entries: [
+                {
+                    Source: 'com.swn.basket.checkoutbasket',
+                    Detail: JSON.stringify(checkoutPayload),
+                    DetailType: 'CheckoutBasket',
+                    Resources: [],
+                    EventBusName: "SwnEventBus",
+                },
+            ],
+        };
+
+        const publishResult = await ebClient.send(new PutEventsCommand(params));
+        console.log("Sucess, event sent; requestID: ", publishResult);
+
+        return publishResult;
+    } catch (e) {
+        console.log(e);
         throw e;
     }
 }
