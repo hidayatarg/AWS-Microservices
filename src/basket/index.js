@@ -200,11 +200,11 @@ const publishCheckoutBasketEvent = async (checkoutPayload) => {
         const params = {
             Entries: [
                 {
-                    Source: 'com.swn.basket.checkoutbasket',
+                    Source: process.env.EVENT_SOURCE,
                     Detail: JSON.stringify(checkoutPayload),
-                    DetailType: 'CheckoutBasket',
+                    DetailType: process.env.EVENT_DETAILTYPE,
                     Resources: [],
-                    EventBusName: "SwnEventBus",
+                    EventBusName: process.env.EVENT_BUSNAME,
                 },
             ],
         };
@@ -218,3 +218,4 @@ const publishCheckoutBasketEvent = async (checkoutPayload) => {
         throw e;
     }
 }
+
