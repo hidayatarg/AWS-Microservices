@@ -1,4 +1,3 @@
-// for reading from dynamodb
 // Create service client module using ES6 syntax.
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
