@@ -25,10 +25,6 @@ const eventBridgeInvocation = async (event) => {
     await createOrder(event.detail);
 }
 
-const apiGatewayInvocation = async (event) => {
-
-}
-
 const createOrder = async (basketCheckoutEvent) => {
     try {
         console.log('createOrder Function event :', basketCheckoutEvent);
@@ -51,3 +47,51 @@ const createOrder = async (basketCheckoutEvent) => {
         throw e;
     }
 }
+
+const apiGatewayInvocation = async (event) => {
+    // GET /order
+    // GET /order/{userName}
+    let body;
+    try {
+        switch (event.httpMethod) {
+            case "GET":
+                if (event.pathParameters != null) {
+                    body = await getOrder(event);
+                } else {
+                    body = await getAllOrders();
+                }
+                break;
+            default:
+                throw new Error(`Unsupported route: "${event.httpMethod}"`);
+        }
+
+        console.log(body);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: `Successfully finished operation: "${event.httpMethod}"`,
+                body: body
+            }),
+        };
+    } catch (e) {
+        console.error(e);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: "Failed to process operation",
+                errorMsg: e.message,
+                errorStack: e.stack
+            }),
+        };
+    }
+}
+
+const getOrder = async (event) => {
+    console.log("getOrder");
+    // implement function to get order from dynamodb table
+};
+
+const getAllOrders = async () => {
+    console.log("getAllOrders");
+    // implement function to get all orders from dynamodb table
+};
