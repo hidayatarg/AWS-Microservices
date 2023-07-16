@@ -1,5 +1,5 @@
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
-import { PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { PutItemCommand, QueryCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { ddbClient } from './ddbClient.js';
 
 // business code
@@ -88,7 +88,7 @@ const apiGatewayInvocation = async (event) => {
 
 const getOrder = async (event) => {
     console.log("getOrder");
-    // implement function to get order from dynamodb table
+    // get order from dynamodb table
     try {
         // expected request: xxx/order/{userName}?orderDate=timestamp
         const userName = event.pathParameters.userName;
@@ -114,5 +114,19 @@ const getOrder = async (event) => {
 
 const getAllOrders = async () => {
     console.log("getAllOrders");
-    // implement function to get all orders from dynamodb table
+    // get all orders from dynamodb table
+    try {
+        const params = {
+            TableName: process.env.DYNAMODB_TABLE_NAME,
+        };
+
+        const { Items } = await ddbClient.send(new ScanCommand(params));
+        console.log(Items);
+        return (Items)
+            ? Items.map((item) => unmarshall(item))
+            : {};
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 };
